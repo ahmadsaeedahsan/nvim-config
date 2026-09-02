@@ -437,21 +437,31 @@ vim.cmd.colorscheme 'github_dark_default'
   -- - sr)'  - [S]urround [R]eplace [)] [']
   require('mini.surround').setup()
 
-  -- Simple and easy statusline.
-  --  You could remove this setup call if you don't like it,
-  --  and try some other statusline plugin
   local statusline = require 'mini.statusline'
-  -- Set `use_icons` to true if you have a Nerd Font
-  statusline.setup { use_icons = vim.g.have_nerd_font }
 
-  -- You can configure sections in the statusline by overriding their
-  -- default behavior. For example, here we set the section for
-  -- cursor location to LINE:COLUMN
-  ---@diagnostic disable-next-line: duplicate-set-field
-  statusline.section_location = function() return '%2l:%-2v' end
+  vim.api.nvim_set_hl(0, 'StatuslineFilenameBox', { fg = '#1e1e2e', bg = '#89b4fa', bold = true })
 
-  -- ... and there is more!
-  --  Check out: https://github.com/nvim-mini/mini.nvim
+  local function active_content()
+    local mode, mode_hl = statusline.section_mode { trunc_width = 120 }
+    local filename = statusline.section_filename { trunc_width = 140 }
+    local git = statusline.section_git { trunc_width = 75 }
+    local diff = statusline.section_diff { trunc_width = 75 }
+    local location = '%2l:%-2v'
+
+    return statusline.combine_groups {
+      { hl = mode_hl, strings = { mode } },
+      { hl = 'StatuslineFilenameBox', strings = { filename } },
+      '%<',
+      '%=',
+      { hl = mode_hl, strings = { git, diff } },
+      { hl = mode_hl, strings = { location } },
+    }
+  end
+
+  statusline.setup {
+    use_icons = vim.g.have_nerd_font,
+    content = { active = active_content },
+  }
 end
 
 -- ============================================================
